@@ -17,7 +17,7 @@
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(44, 39, 32, 0.05);
             max-width: 1200px;
-            margin: 10px auto;
+            margin: 20px auto;
             color: #2c2720; /* Darker warm charcoal text */
             border: 1px solid #eadecc;
             box-sizing: border-box;
@@ -28,7 +28,6 @@
             gap: 10px;
             margin-bottom: 20px;
         }
-        /* Mobile responsive controls row */
         .controls-row {
             display: flex;
             flex-wrap: wrap;
@@ -42,7 +41,7 @@
             background-color: #fbf9f3;
             color: #2c2720;
             border-radius: 8px;
-            font-size: 16px; /* Prevents iOS auto-zoom on focus */
+            font-size: 16px; 
             outline: none;
             transition: border-color 0.2s;
             box-sizing: border-box;
@@ -51,7 +50,7 @@
             border-color: #d4a373;
         }
         .gre-filter-select {
-            flex: 1 1 calc(50% - 5px); /* Grid configuration on smaller screens */
+            flex: 1 1 calc(50% - 5px);
             min-width: 140px;
             padding: 12px;
             border: 2px solid #eadecc;
@@ -78,7 +77,7 @@
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.2s;
@@ -87,15 +86,17 @@
             justify-content: center;
             gap: 6px;
             box-sizing: border-box;
-            min-height: 44px; /* Touch target baseline */
+            min-height: 44px;
         }
         .gre-btn-sync { background-color: #0d9488; }
         .gre-btn-sync:hover { background-color: #115e59; }
         .gre-btn-random { background-color: #7c2d12; }
         .gre-btn-random.active { background-color: #ea580c; }
-        .gre-btn-random:hover { opacity: 0.9; }
+        .gre-btn-export { background-color: #2563eb; }
+        .gre-btn-import { background-color: #4f46e5; }
+        .gre-btn:hover { opacity: 0.9; }
         
-        #hiddenFileInput { display: none; }
+        #stateFileInput { display: none; }
 
         .gre-grid {
             display: grid;
@@ -160,213 +161,45 @@
         .mem-badge.unknown { background-color: #fce7f3; color: #9d174d; border: 1px solid #fbcfe8; }
         .mem-badge.unseen { background-color: #e2e8f0; color: #475569; border: 1px solid #cbd5e1; }
 
-        .gre-def {
-            font-size: 14px;
-            color: #574f44;
-            margin: 0 0 8px 0;
-            font-style: italic;
-        }
+        .gre-def { font-size: 14px; color: #574f44; margin: 0 0 8px 0; font-style: italic; }
         .gre-collocation {
-            font-size: 13px;
-            color: #065f46;
-            background-color: #e6f4ea;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            display: inline-block;
-            word-break: break-word;
+            font-size: 13px; color: #065f46; background-color: #e6f4ea;
+            padding: 6px 10px; border-radius: 6px; font-weight: 600;
+            margin-bottom: 12px; display: inline-block; word-break: break-word;
         }
-        .gre-section-title {
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: #a39684;
-            margin: 10px 0 4px 0;
-            letter-spacing: 0.5px;
-        }
-        .gre-context-box {
-            font-size: 13px;
-            color: #2c2720;
-            background-color: #fff7ed;
-            border-left: 4px solid #ea580c;
-            padding: 8px 12px;
-            border-radius: 4px;
-            margin: 0 0 10px 0;
-            line-height: 1.4;
-        }
-        .gre-mnemonic {
-            font-size: 14px;
-            color: #1d4ed8;
-            font-weight: 500;
-            background-color: #eff6ff;
-            padding: 6px 10px;
-            border-radius: 6px;
-            margin: 0 0 8px 0;
-        }
-        .gre-vis {
-            font-size: 13px;
-            color: #443e36;
-            margin: 0 0 10px 0;
-            line-height: 1.4;
-        }
-        .gre-chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: auto;
-        }
-        .gre-chip {
-            background-color: #ede8dc;
-            color: #574f44;
-            font-size: 12px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: 500;
-        }
-        .gre-tag {
-            font-size: 11px;
-            color: #786e5f;
-            background-color: #f3eee3;
-            border: 1px solid #eadecc;
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-        .gre-tag.group-tag {
-            background-color: #ede8dc;
-            font-weight: bold;
-            color: #443e36;
-        }
+        .gre-section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: #a39684; margin: 10px 0 4px 0; letter-spacing: 0.5px; }
+        .gre-context-box { font-size: 13px; color: #2c2720; background-color: #fff7ed; border-left: 4px solid #ea580c; padding: 8px 12px; border-radius: 4px; margin: 0 0 10px 0; line-height: 1.4; }
+        .gre-mnemonic { font-size: 14px; color: #1d4ed8; font-weight: 500; background-color: #eff6ff; padding: 6px 10px; border-radius: 6px; margin: 0 0 8px 0; }
+        .gre-vis { font-size: 13px; color: #443e36; margin: 0 0 10px 0; line-height: 1.4; }
+        .gre-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; }
+        .gre-chip { background-color: #ede8dc; color: #574f44; font-size: 12px; padding: 4px 8px; border-radius: 4px; font-weight: 500; }
+        .gre-tag { font-size: 11px; color: #786e5f; background-color: #f3eee3; border: 1px solid #eadecc; padding: 2px 6px; border-radius: 4px; }
+        .gre-tag.group-tag { background-color: #ede8dc; font-weight: bold; color: #443e36; }
+        
         .no-results {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 40px 20px;
-            color: #786e5f;
-            font-size: 16px;
-            background-color: #faf7f0;
-            border-radius: 8px;
-            border: 1px dashed #c4b7a6;
+            grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #786e5f; font-size: 16px;
+            background-color: #faf7f0; border-radius: 8px; border: 1px dashed #c4b7a6;
         }
-        .fc-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin: 10px auto;
-            max-width: 530px;
-            width: 100%;
-            box-sizing: border-box;
-        }
+        .fc-container { display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 10px auto; max-width: 530px; width: 100%; box-sizing: border-box; }
         .fc-card {
-            background: #faf7f0;
-            border: 2px solid #eadecc;
-            border-radius: 16px;
-            min-height: 340px;
-            width: 100%;
-            padding: 20px;
-            box-shadow: 0 10px 25px rgba(44, 39, 32, 0.05);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
+            background: #faf7f0; border: 2px solid #eadecc; border-radius: 16px; min-height: 340px; width: 100%; padding: 20px;
+            box-shadow: 0 10px 25px rgba(44, 39, 32, 0.05); display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-sizing: border-box; -webkit-tap-highlight-color: transparent;
         }
-        .fc-card.revealed {
-            align-items: stretch;
-            text-align: left;
-            justify-content: flex-start;
-        }
-        .fc-front-title {
-            font-size: 34px;
-            font-weight: 800;
-            color: #1c1914;
-            margin-bottom: 12px;
-            word-break: break-all;
-        }
-        .fc-hint {
-            font-size: 12px;
-            color: #a39684;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .fc-score-row {
-            display: flex;
-            gap: 6px;
-            width: 100%;
-            margin-top: 12px;
-        }
-        .score-btn {
-            flex: 1;
-            padding: 12px 4px;
-            font-size: 12px;
-            font-weight: 700;
-            border: 1px solid #eadecc;
-            border-radius: 6px;
-            cursor: pointer;
-            text-transform: uppercase;
-            min-height: 44px;
-        }
+        .fc-card.revealed { align-items: stretch; text-align: left; justify-content: flex-start; }
+        .fc-front-title { font-size: 34px; font-weight: 800; color: #1c1914; margin-bottom: 12px; word-break: break-all; }
+        .fc-hint { font-size: 12px; color: #a39684; text-transform: uppercase; letter-spacing: 1px; }
+        .fc-score-row { display: flex; gap: 6px; width: 100%; margin-top: 12px; }
+        .score-btn { flex: 1; padding: 12px 4px; font-size: 12px; font-weight: 700; border: 1px solid #eadecc; border-radius: 6px; cursor: pointer; text-transform: uppercase; min-height: 44px; }
         .score-btn.know { background-color: #e6f4ea; color: #137333; }
         .score-btn.delay { background-color: #fef7e0; color: #b06000; }
         .score-btn.dont { background-color: #fce8e6; color: #c5221f; }
-
-        .fc-navigation {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            margin-top: 12px;
-            gap: 12px;
-        }
-        .fc-btn {
-            background-color: #faf7f0;
-            border: 2px solid #eadecc;
-            border-radius: 8px;
-            padding: 12px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            color: #574f44;
-            flex: 1;
-            min-height: 44px;
-        }
-        .fc-counter {
-            font-size: 14px;
-            font-weight: 600;
-            color: #786e5f;
-            white-space: nowrap;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 16px;
-            width: 100%;
-        }
-        .stats-card {
-            border: 1px solid #eadecc;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.01);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            box-sizing: border-box;
-        }
-        .stats-group-title {
-            font-size: 20px;
-            font-weight: 800;
-            margin: 0;
-            color: #1c1914;
-        }
-        .stats-metric-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 14px;
-            font-weight: 600;
-        }
+        .fc-navigation { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 12px; gap: 12px; }
+        .fc-btn { background-color: #faf7f0; border: 2px solid #eadecc; border-radius: 8px; padding: 12px; font-size: 15px; font-weight: 600; cursor: pointer; color: #574f44; flex: 1; min-height: 44px; }
+        .fc-counter { font-size: 14px; font-weight: 600; color: #786e5f; white-space: nowrap; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; width: 100%; }
+        .stats-card { border: 1px solid #eadecc; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.01); display: flex; flex-direction: column; gap: 10px; box-sizing: border-box; }
+        .stats-group-title { font-size: 20px; font-weight: 800; margin: 0; color: #1c1914; }
+        .stats-metric-row { display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -421,8 +254,10 @@
 
         <div class="btn-container">
             <button class="gre-btn gre-btn-random" id="greBtnRandom">🔀 Random Off</button>
-            <button class="gre-btn gre-btn-sync" id="greBtnSync">🔄 Sync Folder</button>
-            <input type="file" id="hiddenFileInput" multiple accept=".json">
+            <button class="gre-btn gre-btn-sync" id="greBtnSync">🔄 Refresh Data</button>
+            <button class="gre-btn gre-btn-export" id="greBtnExport">📤 Export State</button>
+            <button class="gre-btn gre-btn-import" id="greBtnImport">📥 Import State</button>
+            <input type="file" id="stateFileInput" accept=".json">
         </div>
     </div>
 
@@ -430,16 +265,15 @@
 </div>
 
 <script>
+// Target word lists to fetch directly off the web server
+const networkJsonFiles = ['g16.json', 'g17.json'];
+
 let wordsData = [];
-let dirHandle = null;
 let currentFlashcardIndex = 0;
 let flashcardRevealed = false;
 let currentFilteredList = [];
 let isRandomized = false;
 let memoryScores = {};
-
-// Mobile Browser Capability Detection check
-const isMobilePlatform = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || !('showDirectoryPicker' in window);
 
 const displayContainer = document.getElementById('greDisplayContainer');
 const searchInput = document.getElementById('greSearch');
@@ -451,49 +285,11 @@ const catFilter = document.getElementById('greCategoryFilter');
 const toneFilter = document.getElementById('greToneFilter');
 const btnSync = document.getElementById('greBtnSync');
 const btnRandom = document.getElementById('greBtnRandom');
-const hiddenFileInput = document.getElementById('hiddenFileInput');
+const btnExport = document.getElementById('greBtnExport');
+const btnImport = document.getElementById('greBtnImport');
+const stateFileInput = document.getElementById('stateFileInput');
 
-// Adapt UI terms for desktop vs mobile layout options immediately
-if (isMobilePlatform) {
-    btnSync.textContent = "📁 Load JSON Files";
-}
-
-const dbName = "GREVocabularyWorkspaceDB";
-const storeName = "WorkspaceStore";
-
-function openDB() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(dbName, 1);
-        request.onupgradeneeded = () => {
-            const db = request.result;
-            if(!db.objectStoreNames.contains(storeName)) db.createObjectStore(storeName);
-        };
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-    });
-}
-
-async function getStoredData(key) {
-    const db = await openDB();
-    return new Promise((resolve) => {
-        const tx = db.transaction(storeName, "readonly");
-        const store = tx.objectStore(storeName);
-        const request = store.get(key);
-        request.onsuccess = () => resolve(request.result || null);
-    });
-}
-
-async function setStoredData(key, value) {
-    const db = await openDB();
-    return new Promise((resolve) => {
-        const tx = db.transaction(storeName, "readwrite");
-        const store = tx.objectStore(storeName);
-        store.put(value, key);
-        tx.oncomplete = () => resolve();
-    });
-}
-
-function saveAppState() {
+function saveAppStateToBrowser() {
     const state = {
         search: searchInput.value,
         mode: modeFilter.value,
@@ -502,13 +298,14 @@ function saveAppState() {
         category: catFilter.value,
         tone: toneFilter.value,
         randomized: isRandomized,
-        flashcardIndex: currentFlashcardIndex
+        flashcardIndex: currentFlashcardIndex,
+        scores: memoryScores
     };
-    localStorage.setItem('gre_mobile_app_state', JSON.stringify(state));
+    localStorage.setItem('gre_netlify_app_state', JSON.stringify(state));
 }
 
-function loadAppState() {
-    const saved = localStorage.getItem('gre_mobile_app_state');
+function loadAppStateFromBrowser() {
+    const saved = localStorage.getItem('gre_netlify_app_state');
     if (!saved) return;
     try {
         const state = JSON.parse(saved);
@@ -520,14 +317,10 @@ function loadAppState() {
         toneFilter.value = state.tone || "all";
         isRandomized = !!state.randomized;
         currentFlashcardIndex = state.flashcardIndex || 0;
+        memoryScores = state.scores || {};
 
-        if (isRandomized) {
-            btnRandom.textContent = "🔀 Random On";
-            btnRandom.classList.add('active');
-        } else {
-            btnRandom.textContent = "🔀 Random Off";
-            btnRandom.classList.remove('active');
-        }
+        btnRandom.textContent = isRandomized ? "🔀 Random On" : "🔀 Random Off";
+        btnRandom.classList.toggle('active', isRandomized);
     } catch(e) {}
 }
 
@@ -608,13 +401,22 @@ function updateView() {
     }
 
     currentFilteredList = getFilteredData();
+    
+    // SAFETY CATCH: If the screen tries to render 0 cards but the dictionary array actually has data,
+    // it means a sticky filter conflict from LocalStorage is locking you out. Reset filters to safe defaults.
+    if (wordsData.length > 0 && currentFilteredList.length === 0) {
+        searchInput.value = "";
+        memoryFilter.value = "all";
+        groupFilter.value = "all";
+        catFilter.value = "all";
+        toneFilter.value = "all";
+        currentFilteredList = getFilteredData(); // Recalculate cleanly
+    }
+
     displayContainer.innerHTML = '';
     
-    // Custom mobile fallback message adjustment logic
     if (wordsData.length === 0) {
-        displayContainer.innerHTML = isMobilePlatform ? 
-            `<div class="no-results">No vocab files loaded. Tap "📁 Load JSON Files" and highlight your study groups to generate your flashcards workspace.</div>` :
-            `<div class="no-results">No folder workspace linked yet. Tap "🔄 Sync Folder" to get started.</div>`;
+        displayContainer.innerHTML = `<div class="no-results">Connecting to Netlify server to download JSON word lists...</div>`;
         return;
     }
     
@@ -629,7 +431,7 @@ function updateView() {
         renderFlashcardLayout();
     }
     else if (mode === 'statistics') renderStatisticsDashboard();
-    saveAppState();
+    saveAppStateToBrowser();
 }
 
 function renderStudyGrid() {
@@ -670,7 +472,7 @@ function renderStudyGrid() {
 
 async function rateFlashcard(word, rating) {
     memoryScores[word] = rating;
-    await setStoredData("memoryScoresState", memoryScores);
+    saveAppStateToBrowser();
     moveFlashcard(1);
 }
 
@@ -766,7 +568,7 @@ function renderStatisticsDashboard() {
         if (!groupMap[item.group]) groupMap[item.group] = { group: item.group, total: 0, known: 0, delayed: 0, reviewNeeded: 0 };
         groupMap[item.group].total++;
         const status = memoryScores[item.word] || 'unseen';
-        if (status === 'known') g=groupMap[item.group].known++;
+        if (status === 'known') groupMap[item.group].known++;
         else if (status === 'delayed') groupMap[item.group].delayed++;
         else groupMap[item.group].reviewNeeded++;
     });
@@ -828,109 +630,69 @@ btnRandom.addEventListener('click', () => {
     currentFlashcardIndex = 0; flashcardRevealed = false; updateView();
 });
 
-// Mobile Multi-File Reader Engine Fallback Loop System
-function handleMobileFiles(files) {
-    let freshWords = [];
-    let processedCount = 0;
-    
-    Array.from(files).forEach(file => {
-        if (!file.name.endsWith('.json')) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const parsed = JSON.parse(e.target.result);
-                if (parsed.group && Array.isArray(parsed.cards)) {
-                    freshWords = [...freshWords, ...parsed.cards.map(c => ({ ...c, group: parseInt(parsed.group) }))];
-                }
-            } catch(err) {}
-            processedCount++;
-            if (processedCount === files.length) {
-                wordsData = freshWords;
-                // Cache full mobile words text state payload in IndexDB directly
-                setStoredData("mobileCachedWordsData", wordsData);
-                updateGroupFilterOptions();
-                updateView();
-            }
-        };
-        reader.readAsText(file);
-    });
-}
-
-async function syncDirectory() {
-    if (isMobilePlatform) {
-        hiddenFileInput.click();
-        return;
-    }
-    try {
-        if (!dirHandle) {
-            dirHandle = await window.showDirectoryPicker();
-            await setStoredData("directoryHandle", dirHandle);
-        }
-        if (await dirHandle.queryPermission({mode: 'read'}) !== 'granted') {
-            await dirHandle.requestPermission({mode: 'read'});
-        }
-        let freshWords = [];
-        for await (const entry of dirHandle.values()) {
-            if (entry.kind === 'file' && entry.name.endsWith('.json')) {
-                const file = await entry.getFile();
-                const text = await file.text();
-                try {
-                    const parsed = JSON.parse(text);
-                    if (parsed.group && Array.isArray(parsed.cards)) {
-                        freshWords = [...freshWords, ...parsed.cards.map(c => ({ ...c, group: parseInt(parsed.group) }))];
-                    }
-                } catch (e) {}
-            }
-        }
-        wordsData = freshWords;
-        updateGroupFilterOptions();
-        updateView();
-    } catch (err) {
-        if (err.name !== 'AbortError') alert("Folder sync access blocked.");
-    }
-}
-
-hiddenFileInput.addEventListener('change', (e) => {
-    if(e.target.files.length > 0) handleMobileFiles(e.target.files);
+btnExport.addEventListener('click', () => {
+    const statePayload = {
+        app_signature: "gre_command_center_state",
+        scores: memoryScores,
+        exported_at: new Date().toISOString()
+    };
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(statePayload, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `gre_vocab_state_${new Date().toISOString().slice(0,10)}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
 });
 
-async function initApp() {
-    loadAppState();
-    try {
-        const storedScores = await getStoredData("memoryScoresState");
-        if (storedScores) memoryScores = storedScores;
+btnImport.addEventListener('click', () => { stateFileInput.click(); });
 
-        if (isMobilePlatform) {
-            const cachedMobileData = await getStoredData("mobileCachedWordsData");
-            if (cachedMobileData) {
-                wordsData = cachedMobileData;
-                updateGroupFilterOptions();
+stateFileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        try {
+            const parsed = JSON.parse(evt.target.result);
+            if (parsed.scores) {
+                memoryScores = parsed.scores;
+                saveAppStateToBrowser();
+                updateView();
+                alert("State loaded successfully!");
+            } else {
+                alert("Invalid state file format.");
             }
-        } else {
-            const storedHandle = await getStoredData("directoryHandle");
-            if (storedHandle) {
-                dirHandle = storedHandle;
-                if (await dirHandle.queryPermission({mode: 'read'}) === 'granted') {
-                    let freshWords = [];
-                    for await (const entry of dirHandle.values()) {
-                        if (entry.kind === 'file' && entry.name.endsWith('.json')) {
-                            const file = await entry.getFile(); const text = await file.text();
-                            const parsed = JSON.parse(text);
-                            if (parsed.group && Array.isArray(parsed.cards)) {
-                                freshWords = [...freshWords, ...parsed.cards.map(c => ({ ...c, group: parseInt(parsed.group) }))];
-                            }
-                        }
-                    }
-                    wordsData = freshWords;
-                    updateGroupFilterOptions();
-                }
+        } catch(err) { alert("Failed to parse JSON."); }
+    };
+    reader.readAsText(file);
+});
+
+// Dynamic Network-Fetch Fetch Loader Engine for Netlify deployment
+async function fetchServerWordLists() {
+    let freshWords = [];
+    for (const fileName of networkJsonFiles) {
+        try {
+            const response = await fetch(`./${fileName}`);
+            if (!response.ok) throw new Error(`HTTP error status: ${response.status}`);
+            const parsed = await response.json();
+            if (parsed.group && Array.isArray(parsed.cards)) {
+                freshWords = [...freshWords, ...parsed.cards.map(c => ({ ...c, group: parseInt(parsed.group) }))];
             }
+        } catch (e) {
+            console.error(`Could not automatically download list file: ${fileName}`, e);
         }
-    } catch(e) {}
+    }
+    wordsData = freshWords;
+    updateGroupFilterOptions();
     updateView();
 }
 
-btnSync.addEventListener('click', syncDirectory);
+async function initApp() {
+    loadAppStateFromBrowser();
+    await fetchServerWordLists();
+}
+
+btnSync.addEventListener('click', fetchServerWordLists);
 searchInput.addEventListener('input', () => { currentFlashcardIndex = 0; updateView(); });
 modeFilter.addEventListener('change', () => { flashcardRevealed = false; updateView(); });
 statsSortFilter.addEventListener('change', updateView);
