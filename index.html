@@ -85,7 +85,7 @@
             background: #fdfbf7;
             color: #2c2720;
             outline: none;
-            width: 100px;
+            width: 120px;
         }
         .btn-container {
             display: flex;
@@ -272,7 +272,7 @@
             </div>
             
             <div class="gre-sync-badge">
-                👤 User Profile ID: 
+                👤 Profile ID: 
                 <input type="text" id="greUserPin" class="sync-input" value="student1">
             </div>
         </div>
@@ -280,8 +280,8 @@
         <div class="btn-container">
             <button class="gre-btn gre-btn-random" id="greBtnRandom">🔀 Random Off</button>
             <button class="gre-btn gre-btn-sync" id="greBtnSync">🔄 Refresh Word Lists</button>
-            <button class="gre-btn gre-btn-cloud-save" id="greBtnCloudSave">☁️ Save Progress to Cloud</button>
-            <button class="gre-btn gre-btn-cloud-load" id="greBtnCloudLoad">☁️ Load Progress from Cloud</button>
+            <button class="gre-btn gre-btn-cloud-save" id="greBtnCloudSave">☁️ Save to Cloud</button>
+            <button class="gre-btn gre-btn-cloud-load" id="greBtnCloudLoad">☁️ Load from Cloud</button>
         </div>
     </div>
 
@@ -653,12 +653,12 @@ btnRandom.addEventListener('click', () => {
     currentFlashcardIndex = 0; flashcardRevealed = false; updateView();
 });
 
-// Save to Netlify Blob Cloud Storage API
+// Save to Netlify Blob Storage API
 async function saveToCloudBlobs() {
     const user = userPinInput.value.trim() || "default_user";
     btnCloudSave.textContent = "⏳ Saving...";
     try {
-        const response = await fetch(`/.netlify/functions/state-manager?user=${encodeURIComponent(user)}`, {
+        const response = await fetch(`/functions/state-manager?user=${encodeURIComponent(user)}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ scores: memoryScores })
@@ -668,16 +668,16 @@ async function saveToCloudBlobs() {
     } catch(err) {
         alert("Cloud saving failed: " + err.message);
     } finally {
-        btnCloudSave.textContent = "☁️ Save Progress to Cloud";
+        btnCloudSave.textContent = "☁️ Save to Cloud";
     }
 }
 
-// Load from Netlify Blob Cloud Storage API
+// Load from Netlify Blob Storage API
 async function loadFromCloudBlobs() {
     const user = userPinInput.value.trim() || "default_user";
     btnCloudLoad.textContent = "⏳ Loading...";
     try {
-        const response = await fetch(`/.netlify/functions/state-manager?user=${encodeURIComponent(user)}`);
+        const response = await fetch(`/functions/state-manager?user=${encodeURIComponent(user)}`);
         if (!response.ok) throw new Error("Server error pulling cloud data.");
         const data = await response.json();
         
@@ -688,7 +688,7 @@ async function loadFromCloudBlobs() {
     } catch(err) {
         alert("Cloud sync load failed: " + err.message);
     } finally {
-        btnCloudLoad.textContent = "☁️ Load Progress from Cloud";
+        btnCloudLoad.textContent = "☁️ Load from Cloud";
     }
 }
 
