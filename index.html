@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRE Vocabulary Command Center</title>
+    <style>
+        body {
+            background-color: #f5f2eb; /* Soft cream base background */
+            margin: 0;
+            padding: 10px;
+        }
+        .gre-widget-container {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #fdfbf7; /* Warm, non-glare canvas cream */
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(44, 39, 32, 0.05);
+            max-width: 1200px;
+            margin: 10px auto;
+            color: #2c2720; /* Darker warm charcoal text */
+            border: 1px solid #eadecc;
+            box-sizing: border-box;
+        }
+        .gre-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        /* Mobile responsive controls row */
+        .controls-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            width: 100%;
+        }
+        .gre-search-bar {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #eadecc;
+            background-color: #fbf9f3;
+            color: #2c2720;
+            border-radius: 8px;
+            font-size: 16px; /* Prevents iOS auto-zoom on focus */
+            outline: none;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+        .gre-search-bar:focus {
+            border-color: #d4a373;
+        }
+        .gre-filter-select {
+            flex: 1 1 calc(50% - 5px); /* Grid configuration on smaller screens */
+            min-width: 140px;
+            padding: 12px;
+            border: 2px solid #eadecc;
+            border-radius: 8px;
+            background-color: #fbf9f3;
+            color: #2c2720;
+            font-size: 15px;
+            cursor: pointer;
+            outline: none;
+            box-sizing: border-box;
+        }
+        .gre-filter-select:focus {
+            border-color: #d4a373;
+        }
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+        .gre-btn {
+            flex: 1 1 140px;
+            padding: 12px 16px;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-sizing: border-box;
+            min-height: 44px; /* Touch target baseline */
+        }
+        .gre-btn-sync { background-color: #0d9488; }
+        .gre-btn-sync:hover { background-color: #115e59; }
+        .gre-btn-random { background-color: #7c2d12; }
+        .gre-btn-random.active { background-color: #ea580c; }
+        .gre-btn-random:hover { opacity: 0.9; }
+        
+        #hiddenFileInput { display: none; }
+
+        .gre-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .gre-card {
+            background-color: #faf7f0;
+            border: 1px solid #eadecc;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 1px 4px rgba(44, 39, 32, 0.02);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-sizing: border-box;
+        }
+        .gre-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            gap: 8px;
+        }
+        .gre-word {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1c1914;
+            margin: 0;
+            word-break: break-word;
+        }
+        .gre-tags-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .gre-badge {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 4px 8px;
+            border-radius: 9999px;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        .gre-badge.positive { background-color: #d1fae5; color: #065f46; }
+        .gre-badge.negative { background-color: #fee2e2; color: #991b1b; }
+        .gre-badge.neutral { background-color: #fef3c7; color: #92400e; }
+        
+        .mem-badge {
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .mem-badge.known { background-color: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+        .mem-badge.delayed { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+        .mem-badge.unknown { background-color: #fce7f3; color: #9d174d; border: 1px solid #fbcfe8; }
+        .mem-badge.unseen { background-color: #e2e8f0; color: #475569; border: 1px solid #cbd5e1; }
+
+        .gre-def {
+            font-size: 14px;
+            color: #574f44;
+            margin: 0 0 8px 0;
+            font-style: italic;
+        }
+        .gre-collocation {
+            font-size: 13px;
+            color: #065f46;
+            background-color: #e6f4ea;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: inline-block;
+            word-break: break-word;
+        }
+        .gre-section-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #a39684;
+            margin: 10px 0 4px 0;
+            letter-spacing: 0.5px;
+        }
+        .gre-context-box {
+            font-size: 13px;
+            color: #2c2720;
+            background-color: #fff7ed;
+            border-left: 4px solid #ea580c;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 0 0 10px 0;
+            line-height: 1.4;
+        }
+        .gre-mnemonic {
+            font-size: 14px;
+            color: #1d4ed8;
+            font-weight: 500;
+            background-color: #eff6ff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            margin: 0 0 8px 0;
+        }
+        .gre-vis {
+            font-size: 13px;
+            color: #443e36;
+            margin: 0 0 10px 0;
+            line-height: 1.4;
+        }
+        .gre-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: auto;
+        }
+        .gre-chip {
+            background-color: #ede8dc;
+            color: #574f44;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .gre-tag {
+            font-size: 11px;
+            color: #786e5f;
+            background-color: #f3eee3;
+            border: 1px solid #eadecc;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .gre-tag.group-tag {
+            background-color: #ede8dc;
+            font-weight: bold;
+            color: #443e36;
+        }
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px 20px;
+            color: #786e5f;
+            font-size: 16px;
+            background-color: #faf7f0;
+            border-radius: 8px;
+            border: 1px dashed #c4b7a6;
+        }
+        .fc-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 10px auto;
+            max-width: 530px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .fc-card {
+            background: #faf7f0;
+            border: 2px solid #eadecc;
+            border-radius: 16px;
+            min-height: 340px;
+            width: 100%;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(44, 39, 32, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .fc-card.revealed {
+            align-items: stretch;
+            text-align: left;
+            justify-content: flex-start;
+        }
+        .fc-front-title {
+            font-size: 34px;
+            font-weight: 800;
+            color: #1c1914;
+            margin-bottom: 12px;
+            word-break: break-all;
+        }
+        .fc-hint {
+            font-size: 12px;
+            color: #a39684;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .fc-score-row {
+            display: flex;
+            gap: 6px;
+            width: 100%;
+            margin-top: 12px;
+        }
+        .score-btn {
+            flex: 1;
+            padding: 12px 4px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid #eadecc;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            min-height: 44px;
+        }
+        .score-btn.know { background-color: #e6f4ea; color: #137333; }
+        .score-btn.delay { background-color: #fef7e0; color: #b06000; }
+        .score-btn.dont { background-color: #fce8e6; color: #c5221f; }
+
+        .fc-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-top: 12px;
+            gap: 12px;
+        }
+        .fc-btn {
+            background-color: #faf7f0;
+            border: 2px solid #eadecc;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #574f44;
+            flex: 1;
+            min-height: 44px;
+        }
+        .fc-counter {
+            font-size: 14px;
+            font-weight: 600;
+            color: #786e5f;
+            white-space: nowrap;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+            width: 100%;
+        }
+        .stats-card {
+            border: 1px solid #eadecc;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.01);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-sizing: border-box;
+        }
+        .stats-group-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin: 0;
+            color: #1c1914;
+        }
+        .stats-metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="gre-widget-container">
+    <div class="gre-controls">
+        <input type="text" id="greSearch" class="gre-search-bar" placeholder="Search dataset vocabulary...">
+        
+        <div class="controls-row">
+            <select id="greModeFilter" class="gre-filter-select">
+                <option value="study">📝 Study Mode</option>
+                <option value="flashcard">🎴 Flashcards</option>
+                <option value="statistics">📊 Statistics</option>
+            </select>
+
+            <select id="greStatsSortFilter" class="gre-filter-select" style="display: none;">
+                <option value="know">🥇 Highest Mastery</option>
+                <option value="review">🚨 Needs Review</option>
+            </select>
+
+            <select id="greMemoryFilter" class="gre-filter-select">
+                <option value="all">🎯 All States</option>
+                <option value="known">I Know This</option>
+                <option value="delayed">Took Time</option>
+                <option value="unknown">Don't Know</option>
+                <option value="unseen">Unseen</option>
+            </select>
+        </div>
+
+        <div class="controls-row">
+            <select id="greGroupFilter" class="gre-filter-select">
+                <option value="all">All Groups</option>
+            </select>
+
+            <select id="greCategoryFilter" class="gre-filter-select">
+                <option value="all">All Categories</option>
+                <option value="Control & Separation">Control & Separation</option>
+                <option value="Speech & Thought">Speech & Thought</option>
+                <option value="Behavior & Traits">Behavior & Traits</option>
+                <option value="Compliance & Accord">Compliance & Accord</option>
+                <option value="Social Dynamics">Social Dynamics</option>
+                <option value="Quantity & State">Quantity & State</option>
+            </select>
+
+            <select id="greToneFilter" class="gre-filter-select">
+                <option value="all">All Tones</option>
+                <option value="positive">Positive</option>
+                <option value="negative">Negative</option>
+                <option value="neutral">Neutral</option>
+            </select>
+        </div>
+
+        <div class="btn-container">
+            <button class="gre-btn gre-btn-random" id="greBtnRandom">🔀 Random Off</button>
+            <button class="gre-btn gre-btn-sync" id="greBtnSync">🔄 Sync Folder</button>
+            <input type="file" id="hiddenFileInput" multiple accept=".json">
+        </div>
+    </div>
+
+    <div id="greDisplayContainer"></div>
+</div>
+
+<script>
+let wordsData = [];
+let dirHandle = null;
+let currentFlashcardIndex = 0;
+let flashcardRevealed = false;
+let currentFilteredList = [];
+let isRandomized = false;
+let memoryScores = {};
+
+// Mobile Browser Capability Detection check
+const isMobilePlatform = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || !('showDirectoryPicker' in window);
+
+const displayContainer = document.getElementById('greDisplayContainer');
+const searchInput = document.getElementById('greSearch');
+const modeFilter = document.getElementById('greModeFilter');
+const statsSortFilter = document.getElementById('greStatsSortFilter');
+const memoryFilter = document.getElementById('greMemoryFilter');
+const groupFilter = document.getElementById('greGroupFilter');
+const catFilter = document.getElementById('greCategoryFilter');
+const toneFilter = document.getElementById('greToneFilter');
+const btnSync = document.getElementById('greBtnSync');
+const btnRandom = document.getElementById('greBtnRandom');
+const hiddenFileInput = document.getElementById('hiddenFileInput');
+
+// Adapt UI terms for desktop vs mobile layout options immediately
+if (isMobilePlatform) {
+    btnSync.textContent = "📁 Load JSON Files";
+}
+
+const dbName = "GREVocabularyWorkspaceDB";
+const storeName = "WorkspaceStore";
+
+function openDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(dbName, 1);
+        request.onupgradeneeded = () => {
+            const db = request.result;
+            if(!db.objectStoreNames.contains(storeName)) db.createObjectStore(storeName);
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+async function getStoredData(key) {
+    const db = await openDB();
+    return new Promise((resolve) => {
+        const tx = db.transaction(storeName, "readonly");
+        const store = tx.objectStore(storeName);
+        const request = store.get(key);
+        request.onsuccess = () => resolve(request.result || null);
+    });
+}
+
+async function setStoredData(key, value) {
+    const db = await openDB();
+    return new Promise((resolve) => {
+        const tx = db.transaction(storeName, "readwrite");
+        const store = tx.objectStore(storeName);
+        store.put(value, key);
+        tx.oncomplete = () => resolve();
+    });
+}
+
+function saveAppState() {
+    const state = {
+        search: searchInput.value,
+        mode: modeFilter.value,
+        memory: memoryFilter.value,
+        group: groupFilter.value,
+        category: catFilter.value,
+        tone: toneFilter.value,
+        randomized: isRandomized,
+        flashcardIndex: currentFlashcardIndex
+    };
+    localStorage.setItem('gre_mobile_app_state', JSON.stringify(state));
+}
+
+function loadAppState() {
+    const saved = localStorage.getItem('gre_mobile_app_state');
+    if (!saved) return;
+    try {
+        const state = JSON.parse(saved);
+        searchInput.value = state.search || "";
+        modeFilter.value = state.mode || "study";
+        memoryFilter.value = state.memory || "all";
+        groupFilter.value = state.group || "all";
+        catFilter.value = state.category || "all";
+        toneFilter.value = state.tone || "all";
+        isRandomized = !!state.randomized;
+        currentFlashcardIndex = state.flashcardIndex || 0;
+
+        if (isRandomized) {
+            btnRandom.textContent = "🔀 Random On";
+            btnRandom.classList.add('active');
+        } else {
+            btnRandom.textContent = "🔀 Random Off";
+            btnRandom.classList.remove('active');
+        }
+    } catch(e) {}
+}
+
+function updateGroupFilterOptions() {
+    const previousValue = groupFilter.value || "all";
+    const groups = [...new Set(wordsData.map(item => item.group))].sort((a,b) => a-b);
+    
+    groupFilter.innerHTML = '<option value="all">All Groups</option>';
+    groups.forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = String(g);
+        opt.textContent = `Group ${g}`;
+        if(String(g) === previousValue) opt.selected = true;
+        groupFilter.appendChild(opt);
+    });
+}
+
+function shuffleArray(array) {
+    let shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
+function getMemoryBadgeHTML(word) {
+    const status = memoryScores[word] || 'unseen';
+    if (status === 'known') return `<span class="mem-badge known">Known</span>`;
+    if (status === 'delayed') return `<span class="mem-badge delayed">Delayed</span>`;
+    if (status === 'unknown') return `<span class="mem-badge unknown">Don't Know</span>`;
+    return `<span class="mem-badge unseen">Unseen</span>`;
+}
+
+function getFilteredData() {
+    const query = searchInput.value.toLowerCase().trim();
+    const selectedGroup = groupFilter.value || "all";
+    const selectedCat = catFilter.value || "all";
+    const selectedTone = toneFilter.value || "all";
+    const selectedMemory = memoryFilter.value || "all";
+    
+    let filteredList = wordsData.filter(item => {
+        const wordStr = (item.word || '').toLowerCase();
+        const defStr = (item.def || '').toLowerCase();
+        const phraseStr = (item.phrase || '').toLowerCase();
+        const contextStr = (item.context || '').toLowerCase();
+        const synsArray = Array.isArray(item.syns) ? item.syns : [];
+        const status = memoryScores[item.word] || 'unseen';
+        
+        const matchesSearch = query === "" || 
+                              wordStr.includes(query) || 
+                              defStr.includes(query) || 
+                              phraseStr.includes(query) || 
+                              contextStr.includes(query) ||
+                              synsArray.some(s => s.toLowerCase().includes(query));
+                              
+        const matchesGroup = selectedGroup === 'all' || String(item.group) === selectedGroup;
+        const matchesCat = selectedCat === 'all' || item.cat === selectedCat;
+        const matchesTone = selectedTone === 'all' || item.tone === selectedTone;
+        const matchesMemory = selectedMemory === 'all' || status === selectedMemory;
+        
+        return matchesSearch && matchesGroup && matchesCat && matchesTone && matchesMemory;
+    });
+
+    if (isRandomized) return shuffleArray(filteredList);
+    return filteredList;
+}
+
+function updateView() {
+    const mode = modeFilter.value;
+    
+    if (mode === 'statistics') {
+        statsSortFilter.style.display = "inline-block";
+        searchInput.disabled = memoryFilter.disabled = groupFilter.disabled = catFilter.disabled = toneFilter.disabled = btnRandom.disabled = true;
+    } else {
+        statsSortFilter.style.display = "none";
+        searchInput.disabled = memoryFilter.disabled = groupFilter.disabled = catFilter.disabled = toneFilter.disabled = btnRandom.disabled = false;
+    }
+
+    currentFilteredList = getFilteredData();
+    displayContainer.innerHTML = '';
+    
+    // Custom mobile fallback message adjustment logic
+    if (wordsData.length === 0) {
+        displayContainer.innerHTML = isMobilePlatform ? 
+            `<div class="no-results">No vocab files loaded. Tap "📁 Load JSON Files" and highlight your study groups to generate your flashcards workspace.</div>` :
+            `<div class="no-results">No folder workspace linked yet. Tap "🔄 Sync Folder" to get started.</div>`;
+        return;
+    }
+    
+    if (currentFilteredList.length === 0) {
+        displayContainer.innerHTML = '<div class="no-results">No vocabulary words match your active criteria parameters.</div>';
+        return;
+    }
+    
+    if (mode === 'study') renderStudyGrid();
+    else if (mode === 'flashcard') {
+        if (currentFlashcardIndex >= currentFilteredList.length) currentFlashcardIndex = 0;
+        renderFlashcardLayout();
+    }
+    else if (mode === 'statistics') renderStatisticsDashboard();
+    saveAppState();
+}
+
+function renderStudyGrid() {
+    const grid = document.createElement('div');
+    grid.className = 'gre-grid';
+    
+    currentFilteredList.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'gre-card';
+        const synChips = (item.syns || []).map(s => `<span class="gre-chip">${s}</span>`).join('');
+        const memBadgeHTML = getMemoryBadgeHTML(item.word);
+        
+        card.innerHTML = `
+            <div class="gre-card-header">
+                <h3 class="gre-word">${item.word}</h3>
+                <span class="gre-badge ${item.tone || 'neutral'}">${item.tone || 'neutral'}</span>
+            </div>
+            <div class="gre-tags-row">
+                <span class="gre-tag group-tag">G ${item.group}</span>
+                <span class="gre-tag">${item.cat || 'General'}</span>
+                ${memBadgeHTML}
+            </div>
+            <p class="gre-def">${item.def || ''}</p>
+            <span class="gre-collocation">${item.phrase || ''}</span>
+            <div class="gre-section-title">⚠️ How GRE Uses This Word</div>
+            <p class="gre-context-box">${item.context || ''}</p>
+            <div class="gre-section-title">Mnemonic Trick</div>
+            <p class="gre-mnemonic">${item.mnem || ''}</p>
+            <div class="gre-section-title">Mental Image</div>
+            <p class="gre-vis">${item.vis || ''}</p>
+            <div class="gre-section-title">GRE Synonyms</div>
+            <div class="gre-chips">${synChips}</div>
+        `;
+        grid.appendChild(card);
+    });
+    displayContainer.appendChild(grid);
+}
+
+async function rateFlashcard(word, rating) {
+    memoryScores[word] = rating;
+    await setStoredData("memoryScoresState", memoryScores);
+    moveFlashcard(1);
+}
+
+function renderFlashcardLayout() {
+    displayContainer.innerHTML = '';
+    const item = currentFilteredList[currentFlashcardIndex];
+    const container = document.createElement('div');
+    container.className = 'fc-container';
+    
+    const card = document.createElement('div');
+    card.className = `fc-card ${flashcardRevealed ? 'revealed' : ''}`;
+    const memBadgeHTML = getMemoryBadgeHTML(item.word);
+    
+    if (!flashcardRevealed) {
+        card.innerHTML = `
+            <div class="fc-front-title">${item.word}</div>
+            <div class="gre-tags-row">${memBadgeHTML}</div>
+            <div class="fc-hint" style="margin-top:15px;">Group ${item.group} • Tap Card To Flip</div>
+        `;
+    } else {
+        const synChips = (item.syns || []).map(s => `<span class="gre-chip">${s}</span>`).join('');
+        card.innerHTML = `
+            <div class="gre-card-header">
+                <h3 class="gre-word" style="font-size: 24px;">${item.word}</h3>
+                <span class="gre-badge ${item.tone || 'neutral'}">${item.tone || 'neutral'}</span>
+            </div>
+            <div class="gre-tags-row">
+                <span class="gre-tag group-tag">Group ${item.group}</span>
+                <span class="gre-tag">${item.cat || 'General'}</span>
+                ${memBadgeHTML}
+            </div>
+            <p class="gre-def">${item.def || ''}</p>
+            <span class="gre-collocation">${item.phrase || ''}</span>
+            <div class="gre-section-title">⚠️ How GRE Uses This Word</div>
+            <p class="gre-context-box">${item.context || ''}</p>
+            <div class="gre-section-title">Mnemonic Trick</div>
+            <p class="gre-mnemonic">${item.mnem || ''}</p>
+            <div class="gre-section-title">Mental Image</div>
+            <p class="gre-vis">${item.vis || ''}</p>
+            <div class="gre-section-title">GRE Synonyms</div>
+            <div class="gre-chips">${synChips}</div>
+        `;
+    }
+    
+    card.addEventListener('click', () => {
+        flashcardRevealed = !flashcardRevealed;
+        renderFlashcardLayout();
+    });
+    
+    if (flashcardRevealed) {
+        const scoreRow = document.createElement('div');
+        scoreRow.className = 'fc-score-row';
+        
+        const btnKnow = document.createElement('button'); btnKnow.className = 'score-btn know'; btnKnow.textContent = "Know";
+        btnKnow.onclick = (e) => { e.stopPropagation(); rateFlashcard(item.word, 'known'); };
+        
+        const btnDelay = document.createElement('button'); btnDelay.className = 'score-btn delay'; btnDelay.textContent = "Time";
+        btnDelay.onclick = (e) => { e.stopPropagation(); rateFlashcard(item.word, 'delayed'); };
+        
+        const btnDont = document.createElement('button'); btnDont.className = 'score-btn dont'; btnDont.textContent = "Don't";
+        btnDont.onclick = (e) => { e.stopPropagation(); rateFlashcard(item.word, 'unknown'); };
+        
+        scoreRow.appendChild(btnKnow); scoreRow.appendChild(btnDelay); scoreRow.appendChild(btnDont);
+        container.appendChild(card);
+        container.appendChild(scoreRow);
+    } else {
+        container.appendChild(card);
+    }
+    
+    const nav = document.createElement('div');
+    nav.className = 'fc-navigation';
+    
+    const btnPrev = document.createElement('button'); btnPrev.className = 'fc-btn'; btnPrev.innerHTML = '← Prev';
+    btnPrev.onclick = (e) => { e.stopPropagation(); moveFlashcard(-1); };
+    
+    const counter = document.createElement('div'); counter.className = 'fc-counter';
+    counter.textContent = `${currentFlashcardIndex + 1} / ${currentFilteredList.length}`;
+    
+    const btnNext = document.createElement('button'); btnNext.className = 'fc-btn'; btnNext.innerHTML = 'Next →';
+    btnNext.onclick = (e) => { e.stopPropagation(); moveFlashcard(1); };
+    
+    nav.appendChild(btnPrev); nav.appendChild(counter); nav.appendChild(btnNext);
+    container.appendChild(nav);
+    displayContainer.appendChild(container);
+}
+
+function renderStatisticsDashboard() {
+    const grid = document.createElement('div');
+    grid.className = 'stats-grid';
+    
+    const groupMap = {};
+    wordsData.forEach(item => {
+        if (!groupMap[item.group]) groupMap[item.group] = { group: item.group, total: 0, known: 0, delayed: 0, reviewNeeded: 0 };
+        groupMap[item.group].total++;
+        const status = memoryScores[item.word] || 'unseen';
+        if (status === 'known') g=groupMap[item.group].known++;
+        else if (status === 'delayed') groupMap[item.group].delayed++;
+        else groupMap[item.group].reviewNeeded++;
+    });
+
+    let groupsArray = Object.values(groupMap);
+    if (statsSortFilter.value === 'know') {
+        groupsArray.sort((a, b) => (b.known / b.total) - (a.known / a.total));
+    } else {
+        groupsArray.sort((a, b) => (b.reviewNeeded / b.total) - (a.reviewNeeded / a.total));
+    }
+
+    groupsArray.forEach(g => {
+        const card = document.createElement('div');
+        card.className = 'stats-card';
+        const knownRatio = g.known / g.total;
+        const hue = Math.round(knownRatio * 140);
+        card.style.backgroundColor = `hsl(${hue}, 70%, 93%)`;
+        card.style.borderColor = `hsl(${hue}, 40%, 80%)`;
+
+        card.innerHTML = `
+            <h3 class="stats-group-title">Group ${g.group}</h3>
+            <hr style="border: 0; border-top: 1px solid rgba(0,0,0,0.08); margin: 4px 0;">
+            <div class="stats-metric-row" style="color: #15803d;"><span>Known:</span><span class="stats-val">${g.known}/${g.total} (${Math.round((g.known/g.total)*100)}%)</span></div>
+            <div class="stats-metric-row" style="color: #b45309;"><span>Delayed:</span><span class="stats-val">${g.delayed}</span></div>
+            <div class="stats-metric-row" style="color: #b91c1c;"><span>Review:</span><span class="stats-val">${g.reviewNeeded}</span></div>
+        `;
+        grid.appendChild(card);
+    });
+    displayContainer.appendChild(grid);
+}
+
+function moveFlashcard(direction) {
+    flashcardRevealed = false;
+    currentFlashcardIndex += direction;
+    if (currentFlashcardIndex < 0) currentFlashcardIndex = currentFilteredList.length - 1;
+    else if (currentFlashcardIndex >= currentFilteredList.length) currentFlashcardIndex = 0;
+    updateView();
+}
+
+window.addEventListener('keydown', (e) => {
+    if (modeFilter.value !== 'flashcard' || currentFilteredList.length === 0) return;
+    if (e.key === 'ArrowLeft') moveFlashcard(-1);
+    if (e.key === 'ArrowRight') moveFlashcard(1);
+    if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault(); flashcardRevealed = !flashcardRevealed; renderFlashcardLayout();
+    }
+    if (flashcardRevealed) {
+        const item = currentFilteredList[currentFlashcardIndex];
+        if (e.key === '1') rateFlashcard(item.word, 'known');
+        if (e.key === '2') rateFlashcard(item.word, 'delayed');
+        if (e.key === '3') rateFlashcard(item.word, 'unknown');
+    }
+});
+
+btnRandom.addEventListener('click', () => {
+    isRandomized = !isRandomized;
+    btnRandom.textContent = isRandomized ? "🔀 Random On" : "🔀 Random Off";
+    btnRandom.classList.toggle('active', isRandomized);
+    currentFlashcardIndex = 0; flashcardRevealed = false; updateView();
+});
+
+// Mobile Multi-File Reader Engine Fallback Loop System
+function handleMobileFiles(files) {
+    let freshWords = [];
+    let processedCount = 0;
+    
+    Array.from(files).forEach(file => {
+        if (!file.name.endsWith('.json')) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const parsed = JSON.parse(e.target.result);
+                if (parsed.group && Array.isArray(parsed.cards)) {
+                    freshWords = [...freshWords, ...parsed.cards.map(c => ({ ...c, group: parseInt(parsed.group) }))];
+                }
+            } catch(err) {}
+            processedCount++;
+            if (processedCount === files.length) {
+                wordsData = freshWords;
+                // Cache full mobile words text state payload in IndexDB directly
+                setStoredData("mobileCachedWordsData", wordsData);
+                updateGroupFilterOptions();
+                updateView();
+            }
+        };
+        reader.readAsText(file);
+    });
+}
+
+async function syncDirectory() {
+    if (isMobilePlatform) {
+        hiddenFileInput.click();
+        return;
+    }
+    try {
+        if (!dirHandle) {
+            dirHandle = await window.showDirectoryPicker();
+            await setStoredData("directoryHandle", dirHandle);
+        }
+        if (await dirHandle.queryPermission({mode: 'read'}) !== 'granted') {
+            await dirHandle.requestPermission({mode: 'read'});
+        }
+        let freshWords = [];
+        for await (const entry of dirHandle.values()) {
+            if (entry.kind === 'file' && entry.name.endsWith('.json')) {
+                const file = await entry.getFile();
+                const text = await file.text();
+                try {
+                    const parsed = JSON.parse(text);
+                    if (parsed.group && Array.isArray(parsed.cards)) {
+                        freshWords = [...freshWords, ...parsed.cards.map(c => ({ ...c, group: parseInt(parsed.group) }))];
+                    }
+                } catch (e) {}
+            }
+        }
+        wordsData = freshWords;
+        updateGroupFilterOptions();
+        updateView();
+    } catch (err) {
+        if (err.name !== 'AbortError') alert("Folder sync access blocked.");
+    }
+}
+
+hiddenFileInput.addEventListener('change', (e) => {
+    if(e.target.files.length > 0) handleMobileFiles(e.target.files);
+});
+
+async function initApp() {
+    loadAppState();
+    try {
+        const storedScores = await getStoredData("memoryScoresState");
+        if (storedScores) memoryScores = storedScores;
+
+        if (isMobilePlatform) {
+            const cachedMobileData = await getStoredData("mobileCachedWordsData");
+            if (cachedMobileData) {
+                wordsData = cachedMobileData;
+                updateGroupFilterOptions();
+            }
+        } else {
+            const storedHandle = await getStoredData("directoryHandle");
+            if (storedHandle) {
+                dirHandle = storedHandle;
+                if (await dirHandle.queryPermission({mode: 'read'}) === 'granted') {
+                    let freshWords = [];
+                    for await (const entry of dirHandle.values()) {
+                        if (entry.kind === 'file' && entry.name.endsWith('.json')) {
+                            const file = await entry.getFile(); const text = await file.text();
+                            const parsed = JSON.parse(text);
+                            if (parsed.group && Array.isArray(parsed.cards)) {
+                                freshWords = [...freshWords, ...parsed.cards.map(c => ({ ...c, group: parseInt(parsed.group) }))];
+                            }
+                        }
+                    }
+                    wordsData = freshWords;
+                    updateGroupFilterOptions();
+                }
+            }
+        }
+    } catch(e) {}
+    updateView();
+}
+
+btnSync.addEventListener('click', syncDirectory);
+searchInput.addEventListener('input', () => { currentFlashcardIndex = 0; updateView(); });
+modeFilter.addEventListener('change', () => { flashcardRevealed = false; updateView(); });
+statsSortFilter.addEventListener('change', updateView);
+memoryFilter.addEventListener('change', () => { currentFlashcardIndex = 0; flashcardRevealed = false; updateView(); });
+groupFilter.addEventListener('change', () => { currentFlashcardIndex = 0; flashcardRevealed = false; updateView(); });
+catFilter.addEventListener('change', () => { currentFlashcardIndex = 0; flashcardRevealed = false; updateView(); });
+toneFilter.addEventListener('change', () => { currentFlashcardIndex = 0; flashcardRevealed = false; updateView(); });
+
+initApp();
+</script>
+</body>
+</html>
