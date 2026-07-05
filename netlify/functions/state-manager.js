@@ -1,52 +1,58 @@
 import { getStore } from "@netlify/blobs";
 
-export const handler = async (event) => {
-  // Handle CORS preflight options check safely
-  if (event.httpMethod === "OPTIONS") {
-    return {
-      statusCode: 200,
+export default async (req, context) => {
+  // 1. Handle CORS Preflight checks cleanly
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      status: 200,
       headers: {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers": "Content-Type",
         "Access-Control-Allow-Methods": "GET, POST"
       }
-    };
+    });
   }
 
-  const userKey = event.queryStringParameters.user || "default_user";
+  // 2. Parse out the unique User Profile ID securely
+  const url = new URL(req.url);
+  const userKey = url.searchParams.get("user") || "default_user";
   const store = getStore("gre_vocabulary_states");
 
-  // GET Request: Load data out of cloud blobs
-  if (event.httpMethod === "GET") {
+  // 3. GET Method: Retrieve data blocks from Netlify Blobs storage
+  if (req.method === "GET") {
     try {
       const savedState = await store.get(userKey, { type: "json" });
-      return {
-        statusCode: 200,
-        headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" },
-        body: JSON.stringify(savedState || { scores: {} })
-      };
+      return new Response(JSON.stringify(savedState || { scores: {} }), {
+        status: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json"
+        }
+      });
     } catch (err) {
-      return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+      return new Response(JSON.stringify({ error: err.message }), { status: 500 });
     }
   }
 
-  // POST Request: Save data into cloud blobs
-  if (event.httpMethod === "POST") {
+  // 4. POST Method: Store progress matrix parameters inside Netlify Blobs storage
+  if (req.method === "POST") {
     try {
-      const body = JSON.parse(event.body);
+      const body = await req.json();
       await store.setJSON(userKey, {
         scores: body.scores || {},
         updated_at: new Date().toISOString()
       });
-      return {
-        statusCode: 200,
-        headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" },
-        body: JSON.stringify({ success: true })
-      };
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json"
+        }
+      });
     } catch (err) {
-      return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+      return new Response(JSON.stringify({ error: err.message }), { status: 500 });
     }
   }
 
-  return { statusCode: 405, body: "Method Not Allowed" };
+  return new Response("Method Not Allowed", { status: 405 });
 };
