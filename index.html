@@ -8,21 +8,36 @@
         body { background-color: #f5f2eb; margin: 0; padding: 10px; }
         .gre-widget-container { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #fdfbf7; padding: 16px; border-radius: 12px; box-shadow: 0 4px 12px rgba(44, 39, 32, 0.05); max-width: 1200px; margin: 20px auto; color: #2c2720; border: 1px solid #eadecc; box-sizing: border-box; }
         .gre-controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-        .controls-row { display: flex; flex-wrap: wrap; gap: 10px; width: 100%; }
+        .controls-row { display: flex; flex-wrap: wrap; gap: 10px; width: 100%; align-items: center; }
+        
         .gre-search-bar { width: 100%; padding: 12px 16px; border: 2px solid #eadecc; background-color: #fbf9f3; color: #2c2720; border-radius: 8px; font-size: 16px; outline: none; box-sizing: border-box; }
         .gre-search-bar:focus { border-color: #d4a373; }
-        .gre-filter-select { flex: 1 1 calc(50% - 5px); min-width: 140px; padding: 12px; border: 2px solid #eadecc; border-radius: 8px; background-color: #fbf9f3; color: #2c2720; font-size: 15px; cursor: pointer; outline: none; box-sizing: border-box; }
-        .gre-filter-select:focus { border-color: #d4a373; }
-        .gre-sync-badge { background-color: #ede8dc; border: 1px solid #eadecc; border-radius: 8px; padding: 10px 14px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        
+        /* Modern Multi-Select Dropdown Component Styles */
+        .multi-select-dropdown { position: relative; flex: 1 1 calc(25% - 10px); min-width: 160px; box-sizing: border-box; }
+        .dropdown-button { width: 100%; padding: 12px; border: 2px solid #eadecc; border-radius: 8px; background-color: #fbf9f3; color: #2c2720; font-size: 14px; text-align: left; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-sizing: border-box; font-weight: 500; }
+        .dropdown-content { display: none; position: absolute; background-color: #faf7f0; min-width: 220px; border: 2px solid #eadecc; border-radius: 8px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1); z-index: 10; max-height: 250px; overflow-y: auto; padding: 8px; box-sizing: border-box; margin-top: 4px; }
+        .multi-select-dropdown.open .dropdown-content { display: block; }
+        .dropdown-option { display: flex; align-items: center; gap: 8px; padding: 6px 8px; cursor: pointer; border-radius: 4px; font-size: 14px; color: #443e36; }
+        .dropdown-option:hover { background-color: #ede8dc; }
+        .dropdown-option input { cursor: pointer; margin: 0; width: 16px; height: 16px; accent-color: #d4a373; }
+        
+        .gre-filter-select-mode { flex: 1 1 150px; padding: 12px; border: 2px solid #eadecc; border-radius: 8px; background-color: #fbf9f3; color: #2c2720; font-size: 15px; cursor: pointer; outline: none; }
+        
+        .gre-sync-badge { background-color: #ede8dc; border: 1px solid #eadecc; border-radius: 8px; padding: 10px 14px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-left: auto; }
         .sync-input { border: 1px solid #c4b7a6; padding: 4px 8px; border-radius: 4px; font-size: 13px; background: #fdfbf7; color: #2c2720; outline: none; width: 120px; }
-        .btn-container { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; }
+        
+        .btn-container { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; margin-top: 5px; }
         .gre-btn { flex: 1 1 140px; padding: 12px 16px; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box; min-height: 44px; }
+        .gre-btn-filter { background-color: #ea580c; font-size: 15px; font-weight: 700; flex: 2 1 200px; box-shadow: 0 2px 4px rgba(234, 88, 12, 0.2); }
+        .gre-btn-filter:hover { background-color: #c2410c; }
         .gre-btn-sync { background-color: #0d9488; }
         .gre-btn-random { background-color: #7c2d12; }
         .gre-btn-random.active { background-color: #ea580c; }
         .gre-btn-cloud-save { background-color: #2563eb; }
         .gre-btn-cloud-load { background-color: #4f46e5; }
         .gre-btn:hover { opacity: 0.9; }
+        
         .gre-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
         .gre-card { background-color: #faf7f0; border: 1px solid #eadecc; border-radius: 10px; padding: 16px; box-shadow: 0 1px 4px rgba(44, 39, 32, 0.02); display: flex; flex-direction: column; position: relative; box-sizing: border-box; }
         .gre-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px; }
@@ -71,54 +86,69 @@
 
 <div class="gre-widget-container">
     <div class="gre-controls">
-        <input type="text" id="greSearch" class="gre-search-bar" placeholder="Search dataset vocabulary...">
+        <input type="text" id="greSearch" class="gre-search-bar" placeholder="Search word, meaning, phrase, context, or synonym (live text search)...">
         
         <div class="controls-row">
-            <select id="greModeFilter" class="gre-filter-select">
+            <select id="greModeFilter" class="gre-filter-select-mode">
                 <option value="study">📝 Study Mode</option>
                 <option value="flashcard">🎴 Flashcards</option>
                 <option value="statistics">📊 Statistics</option>
             </select>
-            <select id="greStatsSortFilter" class="gre-filter-select" style="display: none;">
+            <select id="greStatsSortFilter" class="gre-filter-select-mode" style="display: none;">
                 <option value="know">🥇 Highest Mastery</option>
                 <option value="review">🚨 Needs Review</option>
             </select>
-            <select id="greMemoryFilter" class="gre-filter-select">
-                <option value="all">🎯 All States</option>
-                <option value="known">I Know This</option>
-                <option value="delayed">Took Time</option>
-                <option value="unknown">Don't Know</option>
-                <option value="unseen">Unseen</option>
-            </select>
-        </div>
 
-        <div class="controls-row" style="align-items: center; justify-content: space-between;">
-            <div style="display: flex; flex-wrap: wrap; gap: 10px; flex: 3;">
-                <select id="greGroupFilter" class="gre-filter-select">
-                    <option value="all">All Groups</option>
-                </select>
-                <select id="greCategoryFilter" class="gre-filter-select">
-                    <option value="all">All Categories</option>
-                    <option value="Control & Separation">Control & Separation</option>
-                    <option value="Speech & Thought">Speech & Thought</option>
-                    <option value="Behavior & Traits">Behavior & Traits</option>
-                    <option value="Compliance & Accord">Compliance & Accord</option>
-                    <option value="Social Dynamics">Social Dynamics</option>
-                    <option value="Quantity & State">Quantity & State</option>
-                </select>
-                <select id="greToneFilter" class="gre-filter-select">
-                    <option value="all">All Tones</option>
-                    <option value="positive">Positive</option>
-                    <option value="negative">Negative</option>
-                    <option value="neutral">Neutral</option>
-                </select>
+            <!-- Memory Filter Dropdown -->
+            <div class="multi-select-dropdown" id="dropdownMemory">
+                <button class="dropdown-button" onclick="toggleDropdown('dropdownMemory')">🧠 Memory States (All)</button>
+                <div class="dropdown-content">
+                    <label class="dropdown-option"><input type="checkbox" value="unseen" checked> Unseen</label>
+                    <label class="dropdown-option"><input type="checkbox" value="known" checked> Known</label>
+                    <label class="dropdown-option"><input type="checkbox" value="delayed" checked> Delayed</label>
+                    <label class="dropdown-option"><input type="checkbox" value="unknown" checked> Don't Know</label>
+                </div>
             </div>
+
+            <!-- Group Filter Dropdown -->
+            <div class="multi-select-dropdown" id="dropdownGroup">
+                <button class="dropdown-button" onclick="toggleDropdown('dropdownGroup')">📁 Word Groups (All)</button>
+                <div class="dropdown-content" id="groupOptionsContainer">
+                    <!-- Loaded dynamically -->
+                </div>
+            </div>
+
+            <!-- Category Filter Dropdown -->
+            <div class="multi-select-dropdown" id="dropdownCategory">
+                <button class="dropdown-button" onclick="toggleDropdown('dropdownCategory')">🏷️ Categories (All)</button>
+                <div class="dropdown-content">
+                    <label class="dropdown-option"><input type="checkbox" value="Control & Separation" checked> Control & Separation</label>
+                    <label class="dropdown-option"><input type="checkbox" value="Speech & Thought" checked> Speech & Thought</label>
+                    <label class="dropdown-option"><input type="checkbox" value="Behavior & Traits" checked> Behavior & Traits</label>
+                    <label class="dropdown-option"><input type="checkbox" value="Compliance & Accord" checked> Compliance & Accord</label>
+                    <label class="dropdown-option"><input type="checkbox" value="Social Dynamics" checked> Social Dynamics</label>
+                    <label class="dropdown-option"><input type="checkbox" value="Quantity & State" checked> Quantity & State</label>
+                    <label class="dropdown-option"><input type="checkbox" value="General" checked> General / Other</label>
+                </div>
+            </div>
+
+            <!-- Tone Filter Dropdown -->
+            <div class="multi-select-dropdown" id="dropdownTone">
+                <button class="dropdown-button" onclick="toggleDropdown('dropdownTone')">🎭 Tones (All)</button>
+                <div class="dropdown-content">
+                    <label class="dropdown-option"><input type="checkbox" value="positive" checked> Positive</label>
+                    <label class="dropdown-option"><input type="checkbox" value="negative" checked> Negative</label>
+                    <label class="dropdown-option"><input type="checkbox" value="neutral" checked> Neutral</label>
+                </div>
+            </div>
+
             <div class="gre-sync-badge">
                 👤 Profile ID: <input type="text" id="greUserPin" class="sync-input" value="student1">
             </div>
         </div>
 
         <div class="btn-container">
+            <button class="gre-btn gre-btn-filter" id="greBtnApplyFilter">🔍 Apply Filters</button>
             <button class="gre-btn gre-btn-random" id="greBtnRandom">🔀 Random Off</button>
             <button class="gre-btn gre-btn-sync" id="greBtnSync">🔄 Refresh Word Lists</button>
             <button class="gre-btn gre-btn-cloud-save" id="greBtnCloudSave">☁️ Save to Cloud</button>
@@ -140,30 +170,67 @@ const displayContainer = document.getElementById('greDisplayContainer');
 const searchInput = document.getElementById('greSearch');
 const modeFilter = document.getElementById('greModeFilter');
 const statsSortFilter = document.getElementById('greStatsSortFilter');
-const memoryFilter = document.getElementById('greMemoryFilter');
-const groupFilter = document.getElementById('greGroupFilter');
-const catFilter = document.getElementById('greCategoryFilter');
-const toneFilter = document.getElementById('greToneFilter');
 const userPinInput = document.getElementById('greUserPin');
 const btnSync = document.getElementById('greBtnSync');
 const btnRandom = document.getElementById('greBtnRandom');
+const btnApplyFilter = document.getElementById('greBtnApplyFilter');
 const btnCloudSave = document.getElementById('greBtnCloudSave');
 const btnCloudLoad = document.getElementById('greBtnCloudLoad');
+const groupOptionsContainer = document.getElementById('groupOptionsContainer');
 
 const getApiUrl = (user) => `/.netlify/functions/state-manager?user=${encodeURIComponent(user)}`;
 
+// Multi-select dropdown popover controller
+function toggleDropdown(id) {
+    const dropdown = document.getElementById(id);
+    const isOpen = dropdown.classList.contains('open');
+    closeAllDropdowns();
+    if (!isOpen) dropdown.classList.add('open');
+}
+
+function closeAllDropdowns() {
+    document.querySelectorAll('.multi-select-dropdown').forEach(d => d.classList.remove('open'));
+}
+
+// Close popovers if clicking completely outside
+window.addEventListener('click', (e) => {
+    if (!e.target.closest('.multi-select-dropdown')) closeAllDropdowns();
+});
+
+// Updates labels with current item pick metrics
+function updateDropdownLabels() {
+    const checkCount = (id) => Array.from(document.querySelectorAll(`#${id} .dropdown-content input[type="checkbox"]:checked`)).length;
+    const totalCount = (id) => Array.from(document.querySelectorAll(`#${id} .dropdown-content input[type="checkbox"]`)).length;
+    
+    const setLabel = (id, baseName) => {
+        const checked = checkCount(id);
+        const total = totalCount(id);
+        const btn = document.querySelector(`#${id} .dropdown-button`);
+        if (checked === total) btn.textContent = `${baseName} (All)`;
+        else if (checked === 0) btn.textContent = `${baseName} (None Selected)`;
+        else btn.textContent = `${baseName} (${checked}/${total})`;
+    };
+
+    setLabel('dropdownMemory', '🧠 Memory States');
+    setLabel('dropdownGroup', '📁 Word Groups');
+    setLabel('dropdownCategory', '🏷️ Categories');
+    setLabel('dropdownTone', '🎭 Tones');
+}
+
 function saveAppStateToBrowser() {
+    const getCheckedValues = (id) => Array.from(document.querySelectorAll(`#${id} .dropdown-content input[type="checkbox"]:checked`)).map(c => c.value);
+    
     const state = {
         search: searchInput.value,
         mode: modeFilter.value,
-        memory: memoryFilter.value,
-        group: groupFilter.value,
-        category: catFilter.value,
-        tone: toneFilter.value,
         randomized: isRandomized,
         flashcardIndex: currentFlashcardIndex,
         scores: memoryScores,
-        userPin: userPinInput.value
+        userPin: userPinInput.value,
+        filterMemory: getCheckedValues('dropdownMemory'),
+        filterGroup: getCheckedValues('dropdownGroup'),
+        filterCategory: getCheckedValues('dropdownCategory'),
+        filterTone: getCheckedValues('dropdownTone')
     };
     localStorage.setItem('gre_netlify_app_state', JSON.stringify(state));
 }
@@ -175,10 +242,6 @@ function loadAppStateFromBrowser() {
         const state = JSON.parse(saved);
         searchInput.value = state.search || "";
         modeFilter.value = state.mode || "study";
-        memoryFilter.value = state.memory || "all";
-        groupFilter.value = state.group || "all";
-        catFilter.value = state.category || "all";
-        toneFilter.value = state.tone || "all";
         userPinInput.value = state.userPin || "student1";
         isRandomized = !!state.randomized;
         currentFlashcardIndex = state.flashcardIndex || 0;
@@ -186,20 +249,38 @@ function loadAppStateFromBrowser() {
 
         btnRandom.textContent = isRandomized ? "🔀 Random On" : "🔀 Random Off";
         btnRandom.classList.toggle('active', isRandomized);
+
+        const setCheckedValues = (id, savedValues) => {
+            if (!savedValues) return;
+            document.querySelectorAll(`#${id} .dropdown-content input[type="checkbox"]`).forEach(cb => {
+                cb.checked = savedValues.includes(cb.value);
+            });
+        };
+
+        setCheckedValues('dropdownMemory', state.filterMemory);
+        setCheckedValues('dropdownCategory', state.filterCategory);
+        setCheckedValues('dropdownTone', state.filterTone);
+        // group options depend on loaded files, handled after scan completes
+        window.stashedGroupFilters = state.filterGroup;
     } catch(e) {}
 }
 
 function updateGroupFilterOptions() {
-    const previousValue = groupFilter.value || "all";
     const groups = [...new Set(wordsData.map(item => item.group))].sort((a,b) => a-b);
-    groupFilter.innerHTML = '<option value="all">All Groups</option>';
+    groupOptionsContainer.innerHTML = '';
+    
     groups.forEach(g => {
-        const opt = document.createElement('option');
-        opt.value = String(g);
-        opt.textContent = `Group ${g}`;
-        if(String(g) === previousValue) opt.selected = true;
-        groupFilter.appendChild(opt);
+        const label = document.createElement('label');
+        label.className = 'dropdown-option';
+        
+        // Match selection history if it exists
+        const isChecked = window.stashedGroupFilters ? window.stashedGroupFilters.includes(String(g)) : true;
+        
+        label.innerHTML = `<input type="checkbox" value="${g}" ${isChecked ? 'checked' : ''}> Group ${g}`;
+        groupOptionsContainer.appendChild(label);
     });
+    delete window.stashedGroupFilters;
+    updateDropdownLabels();
 }
 
 function shuffleArray(array) {
@@ -219,13 +300,16 @@ function getMemoryBadgeHTML(word) {
     return `<span class="mem-badge unseen">Unseen</span>`;
 }
 
-// Strictly evaluates parameters *without* shuffling
+// Core parsing filter calculation
 function getFilteredData() {
     const query = searchInput.value.toLowerCase().trim();
-    const selectedGroup = groupFilter.value || "all";
-    const selectedCat = catFilter.value || "all";
-    const selectedTone = toneFilter.value || "all";
-    const selectedMemory = memoryFilter.value || "all";
+    
+    const getCheckedValues = (id) => Array.from(document.querySelectorAll(`#${id} .dropdown-content input[type="checkbox"]:checked`)).map(c => c.value);
+    
+    const selectedMemories = getCheckedValues('dropdownMemory');
+    const selectedGroups = getCheckedValues('dropdownGroup');
+    const selectedCategories = getCheckedValues('dropdownCategory');
+    const selectedTones = getCheckedValues('dropdownTone');
     
     return wordsData.filter(item => {
         const wordStr = (item.word || '').toLowerCase();
@@ -242,49 +326,34 @@ function getFilteredData() {
                               contextStr.includes(query) ||
                               synsArray.some(s => s.toLowerCase().includes(query));
                               
-        const matchesGroup = selectedGroup === 'all' || String(item.group) === selectedGroup;
-        const matchesCat = selectedCat === 'all' || item.cat === selectedCat;
-        const matchesTone = selectedTone === 'all' || item.tone === selectedTone;
-        const matchesMemory = selectedMemory === 'all' || status === selectedMemory;
+        const matchesMemory = selectedMemories.includes(status);
+        const matchesGroup = selectedGroups.includes(String(item.group));
+        const matchesCat = selectedCategories.includes(item.cat || 'General');
+        const matchesTone = selectedTones.includes(item.tone || 'neutral');
         
-        return matchesSearch && matchesGroup && matchesCat && matchesTone && matchesMemory;
+        return matchesSearch && matchesMemory && matchesGroup && matchesCat && matchesTone;
     });
 }
 
-// Called when filter states change to safely establish the baseline list layout
-function handleFilterOrGroupChange() {
+// Action boundary trigger bound to the user-facing Apply Filters button
+function handleFilterExecution() {
     currentFlashcardIndex = 0;
     flashcardRevealed = false;
+    closeAllDropdowns();
+    updateDropdownLabels();
     
     let baseList = getFilteredData();
-    if (isRandomized) {
-        currentFilteredList = shuffleArray(baseList);
-    } else {
-        currentFilteredList = baseList;
-    }
+    currentFilteredList = isRandomized ? shuffleArray(baseList) : baseList;
     updateView();
 }
 
 function updateView() {
     const mode = modeFilter.value;
-    if (mode === 'statistics') {
-        statsSortFilter.style.display = "inline-block";
-        searchInput.disabled = memoryFilter.disabled = groupFilter.disabled = catFilter.disabled = toneFilter.disabled = btnRandom.disabled = true;
-    } else {
-        statsSortFilter.style.display = "none";
-        searchInput.disabled = memoryFilter.disabled = groupFilter.disabled = catFilter.disabled = toneFilter.disabled = btnRandom.disabled = false;
-    }
-
-    // Fallback catch to resolve local storage boundary conflicts safely
-    if (wordsData.length > 0 && currentFilteredList.length === 0) {
-        searchInput.value = "";
-        memoryFilter.value = "all";
-        groupFilter.value = "all";
-        catFilter.value = "all";
-        toneFilter.value = "all";
-        currentFilteredList = getFilteredData();
-        if (isRandomized) currentFilteredList = shuffleArray(currentFilteredList);
-    }
+    const isStats = mode === 'statistics';
+    
+    statsSortFilter.style.display = isStats ? "inline-block" : "none";
+    searchInput.disabled = btnRandom.disabled = btnApplyFilter.disabled = isStats;
+    document.querySelectorAll('.dropdown-button').forEach(b => b.disabled = isStats);
 
     displayContainer.innerHTML = '';
     if (wordsData.length === 0) {
@@ -292,7 +361,7 @@ function updateView() {
         return;
     }
     if (currentFilteredList.length === 0) {
-        displayContainer.innerHTML = '<div class="no-results">No vocabulary words match your active criteria parameters.</div>';
+        displayContainer.innerHTML = '<div class="no-results">No vocabulary words match your active criteria parameters. Adjust filters and click "Apply Filters".</div>';
         return;
     }
     
@@ -456,7 +525,6 @@ window.addEventListener('keydown', (e) => {
     }
 });
 
-// Shuffles the currently filtered deck ONCE when clicked
 btnRandom.addEventListener('click', () => {
     isRandomized = !isRandomized;
     btnRandom.textContent = isRandomized ? "🔀 Random On" : "🔀 Random Off";
@@ -465,11 +533,7 @@ btnRandom.addEventListener('click', () => {
     currentFlashcardIndex = 0; 
     flashcardRevealed = false; 
     
-    if (isRandomized) {
-        currentFilteredList = shuffleArray(currentFilteredList);
-    } else {
-        currentFilteredList = getFilteredData();
-    }
+    currentFilteredList = isRandomized ? shuffleArray(currentFilteredList) : getFilteredData();
     updateView();
 });
 
@@ -506,7 +570,7 @@ async function loadFromCloudBlobs() {
         
         memoryScores = parsedData.scores || {};
         saveAppStateToBrowser();
-        handleFilterOrGroupChange();
+        handleFilterExecution();
         alert(`Cloud data loaded for: "${user}"!`);
     } catch(err) {
         alert("Cloud loading failed!\n\nDetails: " + err.message);
@@ -538,9 +602,9 @@ async function autoScanServerWordLists() {
 
     await Promise.all(scanPromises);
     wordsData = freshWords;
+    
     updateGroupFilterOptions();
     
-    // Establish fresh filtered set baseline state cleanly
     let baseList = getFilteredData();
     currentFilteredList = isRandomized ? shuffleArray(baseList) : baseList;
     updateView();
@@ -554,15 +618,17 @@ async function initApp() {
 btnSync.addEventListener('click', autoScanServerWordLists);
 btnCloudSave.addEventListener('click', saveToCloudBlobs);
 btnCloudLoad.addEventListener('click', loadFromCloudBlobs);
+btnApplyFilter.addEventListener('click', handleFilterExecution);
 
-searchInput.addEventListener('input', handleFilterOrGroupChange);
+// Text input keeps live search fluid, or filters can be explicitly committed via button click
+searchInput.addEventListener('input', () => {
+    let baseList = getFilteredData();
+    currentFilteredList = isRandomized ? shuffleArray(baseList) : baseList;
+    updateView();
+});
 userPinInput.addEventListener('input', saveAppStateToBrowser);
 modeFilter.addEventListener('change', () => { flashcardRevealed = false; updateView(); });
 statsSortFilter.addEventListener('change', updateView);
-memoryFilter.addEventListener('change', handleFilterOrGroupChange);
-groupFilter.addEventListener('change', handleFilterOrGroupChange);
-catFilter.addEventListener('change', handleFilterOrGroupChange);
-toneFilter.addEventListener('change', handleFilterOrGroupChange);
 
 initApp();
 </script>
