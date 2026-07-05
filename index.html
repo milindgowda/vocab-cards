@@ -65,6 +65,28 @@
         .gre-filter-select:focus {
             border-color: #d4a373;
         }
+        .gre-sync-badge {
+            background-color: #ede8dc;
+            border: 1px solid #eadecc;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .sync-input {
+            border: 1px solid #c4b7a6;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            background: #fdfbf7;
+            color: #2c2720;
+            outline: none;
+            width: 100px;
+        }
         .btn-container {
             display: flex;
             gap: 10px;
@@ -92,11 +114,9 @@
         .gre-btn-sync:hover { background-color: #115e59; }
         .gre-btn-random { background-color: #7c2d12; }
         .gre-btn-random.active { background-color: #ea580c; }
-        .gre-btn-export { background-color: #2563eb; }
-        .gre-btn-import { background-color: #4f46e5; }
+        .gre-btn-cloud-save { background-color: #2563eb; }
+        .gre-btn-cloud-load { background-color: #4f46e5; }
         .gre-btn:hover { opacity: 0.9; }
-        
-        #stateFileInput { display: none; }
 
         .gre-grid {
             display: grid;
@@ -229,35 +249,39 @@
             </select>
         </div>
 
-        <div class="controls-row">
-            <select id="greGroupFilter" class="gre-filter-select">
-                <option value="all">All Groups</option>
-            </select>
-
-            <select id="greCategoryFilter" class="gre-filter-select">
-                <option value="all">All Categories</option>
-                <option value="Control & Separation">Control & Separation</option>
-                <option value="Speech & Thought">Speech & Thought</option>
-                <option value="Behavior & Traits">Behavior & Traits</option>
-                <option value="Compliance & Accord">Compliance & Accord</option>
-                <option value="Social Dynamics">Social Dynamics</option>
-                <option value="Quantity & State">Quantity & State</option>
-            </select>
-
-            <select id="greToneFilter" class="gre-filter-select">
-                <option value="all">All Tones</option>
-                <option value="positive">Positive</option>
-                <option value="negative">Negative</option>
-                <option value="neutral">Neutral</option>
-            </select>
+        <div class="controls-row" style="align-items: center; justify-content: space-between;">
+            <div style="display: flex; flex-wrap: wrap; gap: 10px; flex: 3;">
+                <select id="greGroupFilter" class="gre-filter-select">
+                    <option value="all">All Groups</option>
+                </select>
+                <select id="greCategoryFilter" class="gre-filter-select">
+                    <option value="all">All Categories</option>
+                    <option value="Control & Separation">Control & Separation</option>
+                    <option value="Speech & Thought">Speech & Thought</option>
+                    <option value="Behavior & Traits">Behavior & Traits</option>
+                    <option value="Compliance & Accord">Compliance & Accord</option>
+                    <option value="Social Dynamics">Social Dynamics</option>
+                    <option value="Quantity & State">Quantity & State</option>
+                </select>
+                <select id="greToneFilter" class="gre-filter-select">
+                    <option value="all">All Tones</option>
+                    <option value="positive">Positive</option>
+                    <option value="negative">Negative</option>
+                    <option value="neutral">Neutral</option>
+                </select>
+            </div>
+            
+            <div class="gre-sync-badge">
+                👤 User Profile ID: 
+                <input type="text" id="greUserPin" class="sync-input" value="student1">
+            </div>
         </div>
 
         <div class="btn-container">
             <button class="gre-btn gre-btn-random" id="greBtnRandom">🔀 Random Off</button>
-            <button class="gre-btn gre-btn-sync" id="greBtnSync">🔄 Refresh Data</button>
-            <button class="gre-btn gre-btn-export" id="greBtnExport">📤 Export State</button>
-            <button class="gre-btn gre-btn-import" id="greBtnImport">📥 Import State</button>
-            <input type="file" id="stateFileInput" accept=".json">
+            <button class="gre-btn gre-btn-sync" id="greBtnSync">🔄 Refresh Word Lists</button>
+            <button class="gre-btn gre-btn-cloud-save" id="greBtnCloudSave">☁️ Save Progress to Cloud</button>
+            <button class="gre-btn gre-btn-cloud-load" id="greBtnCloudLoad">☁️ Load Progress from Cloud</button>
         </div>
     </div>
 
@@ -265,7 +289,6 @@
 </div>
 
 <script>
-// Target word lists to fetch directly off the web server
 const networkJsonFiles = ['g16.json', 'g17.json'];
 
 let wordsData = [];
@@ -283,11 +306,11 @@ const memoryFilter = document.getElementById('greMemoryFilter');
 const groupFilter = document.getElementById('greGroupFilter');
 const catFilter = document.getElementById('greCategoryFilter');
 const toneFilter = document.getElementById('greToneFilter');
+const userPinInput = document.getElementById('greUserPin');
 const btnSync = document.getElementById('greBtnSync');
 const btnRandom = document.getElementById('greBtnRandom');
-const btnExport = document.getElementById('greBtnExport');
-const btnImport = document.getElementById('greBtnImport');
-const stateFileInput = document.getElementById('stateFileInput');
+const btnCloudSave = document.getElementById('greBtnCloudSave');
+const btnCloudLoad = document.getElementById('greBtnCloudLoad');
 
 function saveAppStateToBrowser() {
     const state = {
@@ -299,7 +322,8 @@ function saveAppStateToBrowser() {
         tone: toneFilter.value,
         randomized: isRandomized,
         flashcardIndex: currentFlashcardIndex,
-        scores: memoryScores
+        scores: memoryScores,
+        userPin: userPinInput.value
     };
     localStorage.setItem('gre_netlify_app_state', JSON.stringify(state));
 }
@@ -315,6 +339,7 @@ function loadAppStateFromBrowser() {
         groupFilter.value = state.group || "all";
         catFilter.value = state.category || "all";
         toneFilter.value = state.tone || "all";
+        userPinInput.value = state.userPin || "student1";
         isRandomized = !!state.randomized;
         currentFlashcardIndex = state.flashcardIndex || 0;
         memoryScores = state.scores || {};
@@ -402,15 +427,13 @@ function updateView() {
 
     currentFilteredList = getFilteredData();
     
-    // SAFETY CATCH: If the screen tries to render 0 cards but the dictionary array actually has data,
-    // it means a sticky filter conflict from LocalStorage is locking you out. Reset filters to safe defaults.
     if (wordsData.length > 0 && currentFilteredList.length === 0) {
         searchInput.value = "";
         memoryFilter.value = "all";
         groupFilter.value = "all";
         catFilter.value = "all";
         toneFilter.value = "all";
-        currentFilteredList = getFilteredData(); // Recalculate cleanly
+        currentFilteredList = getFilteredData();
     }
 
     displayContainer.innerHTML = '';
@@ -630,44 +653,45 @@ btnRandom.addEventListener('click', () => {
     currentFlashcardIndex = 0; flashcardRevealed = false; updateView();
 });
 
-btnExport.addEventListener('click', () => {
-    const statePayload = {
-        app_signature: "gre_command_center_state",
-        scores: memoryScores,
-        exported_at: new Date().toISOString()
-    };
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(statePayload, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `gre_vocab_state_${new Date().toISOString().slice(0,10)}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-});
+// Save to Netlify Blob Cloud Storage API
+async function saveToCloudBlobs() {
+    const user = userPinInput.value.trim() || "default_user";
+    btnCloudSave.textContent = "⏳ Saving...";
+    try {
+        const response = await fetch(`/.netlify/functions/state-manager?user=${encodeURIComponent(user)}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ scores: memoryScores })
+        });
+        if (!response.ok) throw new Error("Server error saving state.");
+        alert(`Cloud save successful for user profile: "${user}"!`);
+    } catch(err) {
+        alert("Cloud saving failed: " + err.message);
+    } finally {
+        btnCloudSave.textContent = "☁️ Save Progress to Cloud";
+    }
+}
 
-btnImport.addEventListener('click', () => { stateFileInput.click(); });
+// Load from Netlify Blob Cloud Storage API
+async function loadFromCloudBlobs() {
+    const user = userPinInput.value.trim() || "default_user";
+    btnCloudLoad.textContent = "⏳ Loading...";
+    try {
+        const response = await fetch(`/.netlify/functions/state-manager?user=${encodeURIComponent(user)}`);
+        if (!response.ok) throw new Error("Server error pulling cloud data.");
+        const data = await response.json();
+        
+        memoryScores = data.scores || {};
+        saveAppStateToBrowser();
+        updateView();
+        alert(`Cloud data loaded for user profile: "${user}"!`);
+    } catch(err) {
+        alert("Cloud sync load failed: " + err.message);
+    } finally {
+        btnCloudLoad.textContent = "☁️ Load Progress from Cloud";
+    }
+}
 
-stateFileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(evt) {
-        try {
-            const parsed = JSON.parse(evt.target.result);
-            if (parsed.scores) {
-                memoryScores = parsed.scores;
-                saveAppStateToBrowser();
-                updateView();
-                alert("State loaded successfully!");
-            } else {
-                alert("Invalid state file format.");
-            }
-        } catch(err) { alert("Failed to parse JSON."); }
-    };
-    reader.readAsText(file);
-});
-
-// Dynamic Network-Fetch Fetch Loader Engine for Netlify deployment
 async function fetchServerWordLists() {
     let freshWords = [];
     for (const fileName of networkJsonFiles) {
@@ -693,7 +717,10 @@ async function initApp() {
 }
 
 btnSync.addEventListener('click', fetchServerWordLists);
+btnCloudSave.addEventListener('click', saveToCloudBlobs);
+btnCloudLoad.addEventListener('click', loadFromCloudBlobs);
 searchInput.addEventListener('input', () => { currentFlashcardIndex = 0; updateView(); });
+userPinInput.addEventListener('input', saveAppStateToBrowser);
 modeFilter.addEventListener('change', () => { flashcardRevealed = false; updateView(); });
 statsSortFilter.addEventListener('change', updateView);
 memoryFilter.addEventListener('change', () => { currentFlashcardIndex = 0; flashcardRevealed = false; updateView(); });
