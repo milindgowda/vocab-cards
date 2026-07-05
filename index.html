@@ -219,6 +219,7 @@ function getMemoryBadgeHTML(word) {
     return `<span class="mem-badge unseen">Unseen</span>`;
 }
 
+// Strictly evaluates parameters *without* shuffling
 function getFilteredData() {
     const query = searchInput.value.toLowerCase().trim();
     const selectedGroup = groupFilter.value || "all";
@@ -226,7 +227,7 @@ function getFilteredData() {
     const selectedTone = toneFilter.value || "all";
     const selectedMemory = memoryFilter.value || "all";
     
-    let filteredList = wordsData.filter(item => {
+    return wordsData.filter(item => {
         const wordStr = (item.word || '').toLowerCase();
         const defStr = (item.def || '').toLowerCase();
         const phraseStr = (item.phrase || '').toLowerCase();
@@ -248,9 +249,20 @@ function getFilteredData() {
         
         return matchesSearch && matchesGroup && matchesCat && matchesTone && matchesMemory;
     });
+}
 
-    if (isRandomized) return shuffleArray(filteredList);
-    return filteredList;
+// Called when filter states change to safely establish the baseline list layout
+function handleFilterOrGroupChange() {
+    currentFlashcardIndex = 0;
+    flashcardRevealed = false;
+    
+    let baseList = getFilteredData();
+    if (isRandomized) {
+        currentFilteredList = shuffleArray(baseList);
+    } else {
+        currentFilteredList = baseList;
+    }
+    updateView();
 }
 
 function updateView() {
@@ -263,7 +275,7 @@ function updateView() {
         searchInput.disabled = memoryFilter.disabled = groupFilter.disabled = catFilter.disabled = toneFilter.disabled = btnRandom.disabled = false;
     }
 
-    currentFilteredList = getFilteredData();
+    // Fallback catch to resolve local storage boundary conflicts safely
     if (wordsData.length > 0 && currentFilteredList.length === 0) {
         searchInput.value = "";
         memoryFilter.value = "all";
@@ -271,6 +283,7 @@ function updateView() {
         catFilter.value = "all";
         toneFilter.value = "all";
         currentFilteredList = getFilteredData();
+        if (isRandomized) currentFilteredList = shuffleArray(currentFilteredList);
     }
 
     displayContainer.innerHTML = '';
@@ -443,11 +456,21 @@ window.addEventListener('keydown', (e) => {
     }
 });
 
+// Shuffles the currently filtered deck ONCE when clicked
 btnRandom.addEventListener('click', () => {
     isRandomized = !isRandomized;
     btnRandom.textContent = isRandomized ? "🔀 Random On" : "🔀 Random Off";
     btnRandom.classList.toggle('active', isRandomized);
-    currentFlashcardIndex = 0; flashcardRevealed = false; updateView();
+    
+    currentFlashcardIndex = 0; 
+    flashcardRevealed = false; 
+    
+    if (isRandomized) {
+        currentFilteredList = shuffleArray(currentFilteredList);
+    } else {
+        currentFilteredList = getFilteredData();
+    }
+    updateView();
 });
 
 async function saveToCloudBlobs() {
@@ -483,7 +506,7 @@ async function loadFromCloudBlobs() {
         
         memoryScores = parsedData.scores || {};
         saveAppStateToBrowser();
-        updateView();
+        handleFilterOrGroupChange();
         alert(`Cloud data loaded for: "${user}"!`);
     } catch(err) {
         alert("Cloud loading failed!\n\nDetails: " + err.message);
@@ -492,14 +515,12 @@ async function loadFromCloudBlobs() {
     }
 }
 
-// Global Automated Scanner Engine Loop for any g*.json files (Tracks 1 to 100 concurrently)
 async function autoScanServerWordLists() {
     let freshWords = [];
     const scanPromises = [];
 
     for (let i = 1; i <= 100; i++) {
         const fileName = `g${i}.json`;
-        // Execute fetches concurrently in parallel 
         const fetchPromise = fetch(`./${fileName}`)
             .then(async (response) => {
                 if (response.ok) {
@@ -510,7 +531,7 @@ async function autoScanServerWordLists() {
                     }
                 }
             })
-            .catch(() => {}); // Skip missing or incomplete endpoints silently
+            .catch(() => {});
         
         scanPromises.push(fetchPromise);
     }
@@ -518,6 +539,10 @@ async function autoScanServerWordLists() {
     await Promise.all(scanPromises);
     wordsData = freshWords;
     updateGroupFilterOptions();
+    
+    // Establish fresh filtered set baseline state cleanly
+    let baseList = getFilteredData();
+    currentFilteredList = isRandomized ? shuffleArray(baseList) : baseList;
     updateView();
 }
 
@@ -529,14 +554,15 @@ async function initApp() {
 btnSync.addEventListener('click', autoScanServerWordLists);
 btnCloudSave.addEventListener('click', saveToCloudBlobs);
 btnCloudLoad.addEventListener('click', loadFromCloudBlobs);
-searchInput.addEventListener('input', () => { currentFlashcardIndex = 0; updateView(); });
+
+searchInput.addEventListener('input', handleFilterOrGroupChange);
 userPinInput.addEventListener('input', saveAppStateToBrowser);
 modeFilter.addEventListener('change', () => { flashcardRevealed = false; updateView(); });
 statsSortFilter.addEventListener('change', updateView);
-memoryFilter.addEventListener('change', () => { currentFlashcardIndex = 0; flashcardRevealed = false; updateView(); });
-groupFilter.addEventListener('change', () => { currentFlashcardIndex = 0; flashcardRevealed = false; updateView(); });
-catFilter.addEventListener('change', () => { currentFlashcardIndex = 0; flashcardRevealed = false; updateView(); });
-toneFilter.addEventListener('change', () => { currentFlashcardIndex = 0; flashcardRevealed = false; updateView(); });
+memoryFilter.addEventListener('change', handleFilterOrGroupChange);
+groupFilter.addEventListener('change', handleFilterOrGroupChange);
+catFilter.addEventListener('change', handleFilterOrGroupChange);
+toneFilter.addEventListener('change', handleFilterOrGroupChange);
 
 initApp();
 </script>
