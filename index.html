@@ -129,8 +129,6 @@
 </div>
 
 <script>
-const networkJsonFiles = ['g16.json', 'g17.json'];
-
 let wordsData = [];
 let currentFlashcardIndex = 0;
 let flashcardRevealed = false;
@@ -152,10 +150,7 @@ const btnRandom = document.getElementById('greBtnRandom');
 const btnCloudSave = document.getElementById('greBtnCloudSave');
 const btnCloudLoad = document.getElementById('greBtnCloudLoad');
 
-// Force dynamic relative path lookup rules directly down the hidden .netlify core tree system
-const getApiUrl = (user) => {
-    return `/.netlify/functions/state-manager?user=${encodeURIComponent(user)}`;
-};
+const getApiUrl = (user) => `/.netlify/functions/state-manager?user=${encodeURIComponent(user)}`;
 
 function saveAppStateToBrowser() {
     const state = {
@@ -216,7 +211,6 @@ function shuffleArray(array) {
     return shuffled;
 }
 
-// Memory Score Status Matrix Badge
 function getMemoryBadgeHTML(word) {
     const status = memoryScores[word] || 'unseen';
     if (status === 'known') return `<span class="mem-badge known">Known</span>`;
@@ -281,7 +275,7 @@ function updateView() {
 
     displayContainer.innerHTML = '';
     if (wordsData.length === 0) {
-        displayContainer.innerHTML = `<div class="no-results">Connecting to Netlify server to download JSON word lists...</div>`;
+        displayContainer.innerHTML = `<div class="no-results">Scanning and downloading vocabulary groups from server...</div>`;
         return;
     }
     if (currentFilteredList.length === 0) {
@@ -456,7 +450,6 @@ btnRandom.addEventListener('click', () => {
     currentFlashcardIndex = 0; flashcardRevealed = false; updateView();
 });
 
-// Save Progress Matrix State Parameters to Cloud
 async function saveToCloudBlobs() {
     const user = userPinInput.value.trim() || "default_user";
     btnCloudSave.textContent = "⏳ Saving...";
@@ -466,14 +459,10 @@ async function saveToCloudBlobs() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ scores: memoryScores })
         });
-        
         const textData = await response.text();
         let parsedData;
         try { parsedData = JSON.parse(textData); } catch(e) {}
-
-        if (!response.ok) {
-            throw new Error(parsedData?.details || parsedData?.error || `HTTP Error ${response.status}`);
-        }
+        if (!response.ok) throw new Error(parsedData?.details || parsedData?.error || `HTTP Error ${response.status}`);
         alert(`Cloud save successful for: "${user}"!`);
     } catch(err) {
         alert("Cloud saving failed!\n\nDetails: " + err.message);
@@ -482,7 +471,6 @@ async function saveToCloudBlobs() {
     }
 }
 
-// Load Progress Matrix State Parameters from Cloud
 async function loadFromCloudBlobs() {
     const user = userPinInput.value.trim() || "default_user";
     btnCloudLoad.textContent = "⏳ Loading...";
@@ -491,10 +479,7 @@ async function loadFromCloudBlobs() {
         const textData = await response.text();
         let parsedData;
         try { parsedData = JSON.parse(textData); } catch(e) {}
-
-        if (!response.ok) {
-            throw new Error(parsedData?.details || parsedData?.error || `HTTP Error ${response.status}`);
-        }
+        if (!response.ok) throw new Error(parsedData?.details || parsedData?.error || `HTTP Error ${response.status}`);
         
         memoryScores = parsedData.scores || {};
         saveAppStateToBrowser();
@@ -507,20 +492,30 @@ async function loadFromCloudBlobs() {
     }
 }
 
-async function fetchServerWordLists() {
+// Global Automated Scanner Engine Loop for any g*.json files (Tracks 1 to 100 concurrently)
+async function autoScanServerWordLists() {
     let freshWords = [];
-    for (const fileName of networkJsonFiles) {
-        try {
-            const response = await fetch(`./${fileName}`);
-            if (!response.ok) throw new Error(`HTTP error status: ${response.status}`);
-            const parsed = await response.json();
-            if (parsed.group && Array.isArray(parsed.cards)) {
-                freshWords = [...freshWords, ...parsed.cards.map(c => ({ ...c, group: parseInt(parsed.group) }))];
-            }
-        } catch (e) {
-            console.error(`Could not download list file: ${fileName}`, e);
-        }
+    const scanPromises = [];
+
+    for (let i = 1; i <= 100; i++) {
+        const fileName = `g${i}.json`;
+        // Execute fetches concurrently in parallel 
+        const fetchPromise = fetch(`./${fileName}`)
+            .then(async (response) => {
+                if (response.ok) {
+                    const parsed = await response.json();
+                    if (parsed.group && Array.isArray(parsed.cards)) {
+                        const compiledCards = parsed.cards.map(c => ({ ...c, group: parseInt(parsed.group) }));
+                        freshWords = [...freshWords, ...compiledCards];
+                    }
+                }
+            })
+            .catch(() => {}); // Skip missing or incomplete endpoints silently
+        
+        scanPromises.push(fetchPromise);
     }
+
+    await Promise.all(scanPromises);
     wordsData = freshWords;
     updateGroupFilterOptions();
     updateView();
@@ -528,10 +523,10 @@ async function fetchServerWordLists() {
 
 async function initApp() {
     loadAppStateFromBrowser();
-    await fetchServerWordLists();
+    await autoScanServerWordLists();
 }
 
-btnSync.addEventListener('click', fetchServerWordLists);
+btnSync.addEventListener('click', autoScanServerWordLists);
 btnCloudSave.addEventListener('click', saveToCloudBlobs);
 btnCloudLoad.addEventListener('click', loadFromCloudBlobs);
 searchInput.addEventListener('input', () => { currentFlashcardIndex = 0; updateView(); });
